@@ -1,0 +1,22 @@
+对于直接给的libc.so.6怎么查看是ubuntu多少的？
+strings libc.so.6 | grep Ubuntu
+会显示:
+GNU C Library (Ubuntu GLIBC 2.35-0ubuntu3.8) stable release version 2.35
+这种
+
+Ubuntu22.04：libc-2.35
+
+Ubuntu21.10：libc-2.34
+Ubuntu21.04：libc-2.33
+
+Ubuntu20.04：libc-2.31
+
+Ubuntu18.04：libc-2.27
+
+Ubuntu16.04：libc-2.23
+
+Ubuntu14.04：libc-2.19
+
+
+tcache: glibc 2.26 (ubuntu 17.10) 之后引入
+tcache: glibc-2.27~glibc-2.28 无检查； glibc-2.29~glibc-2.31 tcache有检查。

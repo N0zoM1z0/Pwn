@@ -1,0 +1,92 @@
+对于要爆破的，可以gdb先关闭ASLR，打通后再来写爆破
+set disable-randomization on
+
+不用发送不可见字符的时候可以采用更简单的方式调试查看内存
+gdb pwn
+b *main
+r
+然后输入完后 Ctrl+C
+这时就会进入pwndbg界面 可以查看内存
+继续运行输 c 即可
+这种更方便... (2024年4月7日才tm发现)
+
+
+
+关于用docker打对应环境的pwn
+https://www.cnblogs.com/ZIKH26/articles/16278170.html
+
+环境: wsl ubuntu root
+
+实例化:
+sudo docker run -u root -it IMAGE ID /bin/bash
+
+启动被停止的容器:
+sudo docker start  CONTAINER ID
+
+root权限进入docker 
+sudo docker exec -it -u root CONTAINER ID /bin/bash
+
+进入后如何把bin和shell.py拷到docker?
+docker cp过于麻烦 直接用windows 起一个http服务
+python -m http.server 9090
+
+然后
+docker curl http://172.20.128.1:9090/pwn --ouput ./pwn
+即可
+然后加权限
+chmod +u+x *
+
+ok desu~
+
+
+唯一美中不足的就是没有Ubuntu16 也就是没有tcache的最后一个版本...
+而好多经典堆题都是打fastbin不用管tcache的...
+
+
+ubuntu18:
+sudo docker start  9c10521073a4
+sudo docker exec -it -u root 9c10521073a4 /bin/bash
+curl http://172.20.128.1:9090/pwn --output ./pwn
+curl http://172.20.128.1:9090/shell.py --output ./shell.py
+
+
+
+patchelf使用:
+ld.so和libc.so.6都要改！
+
+patchelf --set-interpreter ./xxx/ld-xxx.so.2 ./pwn
+patchelf --replace-needed libc.so.6 ./xxx/libc-xxx.so ./pwn
+
+
+这种一般就能行了
+
+pwndbg导入符号表
+第一遍attach的时候
+pwndbg输入 loadfolder /xxx/libc-xxx/.debug/ 即可
+
+
+看ELF链接的libc版本：
+ldd ./pwn
+
+
+查看沙箱保护
+seccomp-tools dump ./pwn
+
+
+tmux用法:
+ctrl+B + 左右方向键 切换窗口
+
+ctrl+B+: 输 set -g mouse on
+可以使用鼠标滚动
+
+找gadget:
+
+ROPgadget ./pwn |  grep "xxx"
+但更推荐ropper
+安装： pip3 install ropper
+使用： ropper -f ./pwn
+
+
+pwndbg pie 相对地址断点:
+
+b *$rebase(0x1111)
